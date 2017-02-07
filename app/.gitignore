@@ -38,6 +38,3 @@ captures/
 
 # Keystore files
 *.jks
-
-# MacOS files
-.DS_Store

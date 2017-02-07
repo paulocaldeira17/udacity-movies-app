@@ -1,0 +1,21 @@
+<resources>
+    <!-- Movies Database Configs -->
+    <string name="movies_database_api_host">https://api.themoviedb.org/</string>
+    <string name="movies_database_api_key">[your themoviedb.org api key goes here]</string>
+    <string name="movies_database_img_path">https://image.tmdb.org/t/p/w185/</string>
+
+    <!-- Strings -->
+    <string name="app_name">Movies</string>
+    <string name="top_rated">Top Rated</string>
+    <string name="most_popular">Popular</string>
+    <string name="details">Details</string>
+    <string name="synopsis">Synopsis</string>
+    <string name="original_title">Original Title</string>
+    <string name="year">Year</string>
+    <string name="rate">Rate</string>
+    <string name="please_check_your_internet_connection">Please check your internet connection</string>
+
+    <!-- Offline data -->
+    <string name="movies_json"></string>
+    <string name="an_error_occurred_please_try_again">An error occurred, please try again.</string>
+</resources>
