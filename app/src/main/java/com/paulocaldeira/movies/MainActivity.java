@@ -2,7 +2,9 @@ package com.paulocaldeira.movies;
 
 import android.accounts.NetworkErrorException;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.content.SharedPreferencesCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -16,6 +18,7 @@ import android.widget.LinearLayout;
 import com.paulocaldeira.movies.adapters.MovieRVAdapter;
 import com.paulocaldeira.movies.components.InfiniteRecyclerView;
 import com.paulocaldeira.movies.data.MovieModel;
+import com.paulocaldeira.movies.helpers.PreferencesHelper;
 import com.paulocaldeira.movies.providers.MovieDataProvider;
 import com.paulocaldeira.movies.providers.MovieRemoteDataProvider;
 import com.paulocaldeira.movies.providers.RequestHandler;
@@ -28,12 +31,18 @@ import butterknife.ButterKnife;
 public class MainActivity extends AppCompatActivity implements
         MovieRVAdapter.OnMovieItemClickListener,
         SwipeRefreshLayout.OnRefreshListener,
-        InfiniteRecyclerView.OnLoadMoreListener {
+        InfiniteRecyclerView.OnLoadMoreListener,
+        SharedPreferences.OnSharedPreferenceChangeListener {
 
     // Constants
     private static final String TAG = "#" + MainActivity.class.getSimpleName();
     private static final int DEFAULT_SPAN = 2;
     private static final int FIRST_PAGE = 1;
+
+    // List mode
+    private static final String MODE_POPULAR = "popular";
+    private static final String MODE_TOP_RATED = "top_rated";
+    private static final String DEFAULT_MODE = MODE_POPULAR;
 
     // Layout
     @BindView(R.id.rv_movies_images) InfiniteRecyclerView mRecyclerView;
@@ -45,13 +54,8 @@ public class MainActivity extends AppCompatActivity implements
     private MovieDataProvider mProvider;
     private ActionBar mActionBar;
 
-    // Attributes
-    private enum Mode {
-        TOP_RATED,
-        MOST_POPULAR
-    }
-
-    private Mode mCurrentMode;
+    // List mode
+    private String mCurrentMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,17 +90,18 @@ public class MainActivity extends AppCompatActivity implements
         mAdapter.setItemClickListener(this);
 
         // Infinite on scroll listener
-        mRecyclerView.addLoadMoreListener(MainActivity.this);
+        mRecyclerView.addLoadMoreListener(this);
 
         // Set first mode
-        setCurrentMode(Mode.MOST_POPULAR);
+        PreferencesHelper.registerUserSharedPreferencesListener(this, this);
+        setCurrentMode(PreferencesHelper.getMoviesListMode(this, DEFAULT_MODE));
     }
 
     /**
      * Sets current mode
      * @param mode Mode
      */
-    private void setCurrentMode(Mode mode) {
+    private void setCurrentMode(String mode) {
         if (mCurrentMode != mode) {
             // Set current mode
             mCurrentMode = mode;
@@ -108,10 +113,10 @@ public class MainActivity extends AppCompatActivity implements
             mRecyclerView.resetState();
 
             switch (mCurrentMode) {
-                case MOST_POPULAR:
+                case MODE_POPULAR:
                     mActionBar.setTitle(R.string.most_popular);
                     break;
-                case TOP_RATED:
+                case MODE_TOP_RATED:
                     mActionBar.setTitle(R.string.top_rated);
                     break;
             }
@@ -136,10 +141,10 @@ public class MainActivity extends AppCompatActivity implements
 
         switch (itemId) {
             case R.id.action_most_popular:
-                setCurrentMode(Mode.MOST_POPULAR);
+                PreferencesHelper.setMoviesListMode(this, MODE_POPULAR);
                 return true;
             case R.id.action_top_rated:
-                setCurrentMode(Mode.TOP_RATED);
+                PreferencesHelper.setMoviesListMode(this, MODE_TOP_RATED);
                 return true;
         }
 
@@ -159,10 +164,10 @@ public class MainActivity extends AppCompatActivity implements
      */
     private void loadMovies(int page) {
         switch (mCurrentMode) {
-            case MOST_POPULAR:
+            case MODE_POPULAR:
                 loadMostPopularMovies(page);
                 break;
-            case TOP_RATED:
+            case MODE_TOP_RATED:
                 loadTopRatedMovies(page);
                 break;
         }
@@ -226,6 +231,13 @@ public class MainActivity extends AppCompatActivity implements
         intent.putExtra(DetailsActivity.EXTRA_MOVIE, movie);
 
         startActivity(intent);
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+        if (s.equals(PreferencesHelper.PREF_MOVIES_LIST_MODE)) {
+            setCurrentMode(sharedPreferences.getString(s, DEFAULT_MODE));
+        }
     }
 
     /**

@@ -10,7 +10,6 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.paulocaldeira.movies.data.MovieModel;
 import com.paulocaldeira.movies.helpers.FormatHelper;
