@@ -10,9 +10,11 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.paulocaldeira.movies.data.MovieModel;
 import com.paulocaldeira.movies.helpers.FormatHelper;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import butterknife.BindView;
@@ -67,9 +69,25 @@ public class DetailsActivity extends AppCompatActivity {
         String imgPath = getString(R.string.movies_database_img_path);
 
         // Load backdrop image
-        Picasso.with(this).load(imgPath + movieModel.getBackdropUrl()).into(mBackdropImageView);
+        Picasso.with(this)
+                .load(imgPath + movieModel.getBackdropUrl())
+                .into(mBackdropImageView);
         // Load poster image
-        Picasso.with(this).load(imgPath + movieModel.getPosterUrl()).into(mPosterImageView);
+        Picasso.with(this)
+                .load(imgPath + movieModel.getPosterUrl())
+                .placeholder(R.drawable.ic_image_grey_400_48dp)
+                .error(R.drawable.ic_broken_image_grey_400_48dp)
+                .into(mPosterImageView, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        mPosterImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                    }
+
+                    @Override
+                    public void onError() {
+                        mPosterImageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                    }
+                });
 
         mCollapsingLayout.setTitle(title);
         mTitleTextView.setText(movieModel.getTitle());

@@ -6,9 +6,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.paulocaldeira.movies.R;
 import com.paulocaldeira.movies.data.MovieModel;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 /**
@@ -34,11 +36,25 @@ public class MovieRVAdapter extends InfiniteRVAdapter<MovieModel, MovieRVAdapter
     }
 
     @Override
-    public void onBindViewHolder(MovieViewHolder holder, int position) {
-        Context context = holder.itemView.getContext();
+    public void onBindViewHolder(final MovieViewHolder holder, int position) {
+        final Context context = holder.itemView.getContext();
         MovieModel movie = mItems.get(position);
 
-        Picasso.with(context).load(context.getString(R.string.movies_database_img_path) + movie.getPosterUrl()).into(holder.mPoster);
+        Picasso.with(context)
+                .load(context.getString(R.string.movies_database_img_path) + movie.getPosterUrl())
+                .placeholder(R.drawable.ic_image_grey_400_48dp)
+                .error(R.drawable.ic_broken_image_grey_400_48dp)
+                .into(holder.mPoster, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        holder.mPoster.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                    }
+
+                    @Override
+                    public void onError() {
+                        holder.mPoster.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                    }
+                });
     }
 
     /**
