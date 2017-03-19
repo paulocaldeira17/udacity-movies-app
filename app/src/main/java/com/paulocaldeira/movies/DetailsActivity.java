@@ -15,6 +15,9 @@ import com.paulocaldeira.movies.data.MovieModel;
 import com.paulocaldeira.movies.helpers.FormatHelper;
 import com.squareup.picasso.Picasso;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class DetailsActivity extends AppCompatActivity {
     // Constants
     private static final String TAG = "#" + DetailsActivity.class.getSimpleName();
@@ -24,34 +27,28 @@ public class DetailsActivity extends AppCompatActivity {
     public static String EXTRA_MOVIE = "extraMovie";
 
     // Layout
-    private CollapsingToolbarLayout mCollapsingLayout;
-    private ImageView mBackdropImageView;
-    private ImageView mPosterImageView;
-    private TextView mSynopsisTextView;
-    private TextView mTitleTextView;
-    private TextView mYearTextView;
-    private TextView mRateTextView;
-    private LinearLayout mRateBarLayout;
+    @BindView(R.id.toolbar_layout) CollapsingToolbarLayout mCollapsingLayout;
+    @BindView(R.id.iv_backdrop) ImageView mBackdropImageView;
+    @BindView(R.id.iv_small_poster) ImageView mPosterImageView;
+    @BindView(R.id.tv_synopsis) TextView mSynopsisTextView;
+    @BindView(R.id.tv_original_title) TextView mTitleTextView;
+    @BindView(R.id.tv_year) TextView mYearTextView;
+    @BindView(R.id.tv_rate) TextView mRateTextView;
+    @BindView(R.id.ll_rate_bar) LinearLayout mRateBarLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
 
+        // Initialize ButterKnife library
+        ButterKnife.bind(this);
+
         // Set toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        mRateBarLayout = (LinearLayout) findViewById(R.id.ll_rate_bar);
-        mCollapsingLayout = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
-        mBackdropImageView = (ImageView) findViewById(R.id.iv_backdrop);
-        mPosterImageView = (ImageView) findViewById(R.id.iv_small_poster);
-        mTitleTextView = (TextView) findViewById(R.id.tv_original_title);
-        mSynopsisTextView = (TextView) findViewById(R.id.tv_synopsis);
-        mYearTextView = (TextView) findViewById(R.id.tv_year);
-        mRateTextView = (TextView) findViewById(R.id.tv_rate);
 
         // Movie passed through extra
         MovieModel movieModel = getExtraMovie();

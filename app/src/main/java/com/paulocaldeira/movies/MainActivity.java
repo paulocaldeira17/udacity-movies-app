@@ -22,6 +22,9 @@ import com.paulocaldeira.movies.providers.RequestHandler;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class MainActivity extends AppCompatActivity implements
         MovieRVAdapter.OnMovieItemClickListener,
         SwipeRefreshLayout.OnRefreshListener,
@@ -33,13 +36,14 @@ public class MainActivity extends AppCompatActivity implements
     private static final int FIRST_PAGE = 1;
 
     // Layout
-    private InfiniteRecyclerView mRecyclerView;
+    @BindView(R.id.rv_movies_images) InfiniteRecyclerView mRecyclerView;
+    @BindView(R.id.srl_loader) SwipeRefreshLayout mSwipeRefreshLayout;
+    @BindView(R.id.ll_no_internet) LinearLayout mNoInternetLayout;
+    @BindView(R.id.ll_request_error) LinearLayout mRequestErrorLayout;
+
     private MovieRVAdapter mAdapter;
     private MovieDataProvider mProvider;
     private ActionBar mActionBar;
-    private SwipeRefreshLayout mSwipeRefreshLayout;
-    private LinearLayout mNoInternetLayout;
-    private LinearLayout mRequestErrorLayout;
 
     // Attributes
     private enum Mode {
@@ -54,12 +58,10 @@ public class MainActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mActionBar = getSupportActionBar();
+        // Initialize ButterKnife library
+        ButterKnife.bind(this);
 
-        mRecyclerView = (InfiniteRecyclerView) findViewById(R.id.rv_movies_images);
-        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.srl_loader);
-        mNoInternetLayout = (LinearLayout) findViewById(R.id.ll_no_internet);
-        mRequestErrorLayout = (LinearLayout) findViewById(R.id.ll_request_error);
+        mActionBar = getSupportActionBar();
 
         GridLayoutManager gridLayout = new GridLayoutManager(this, DEFAULT_SPAN);
         mRecyclerView.setLayoutManager(gridLayout);
