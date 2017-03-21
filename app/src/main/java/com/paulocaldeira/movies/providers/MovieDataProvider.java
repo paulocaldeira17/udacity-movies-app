@@ -22,4 +22,10 @@ public interface MovieDataProvider {
      * @return Most popular movies
      */
     void getMostPopular(int page, RequestHandler<List<MovieModel>> handler);
+
+    /**
+     * Returns favorite movies
+     * @return Favorite movies
+     */
+    void getFavorites(int page, RequestHandler<List<MovieModel>> handler);
 }

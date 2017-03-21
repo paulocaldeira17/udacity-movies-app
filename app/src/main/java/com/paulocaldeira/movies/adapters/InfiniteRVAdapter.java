@@ -62,7 +62,7 @@ public abstract class InfiniteRVAdapter<T, VH extends RecyclerView.ViewHolder> e
      * @param items Items
      */
     public void addItems(List<T> items) {
-        if (mItems != null && items != null) {
+        if (null != mItems && null != items && !items.isEmpty()) {
             mItems.addAll(items);
             notifyDataSetChanged();
         }

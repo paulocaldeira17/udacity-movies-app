@@ -4,15 +4,21 @@ import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.paulocaldeira.movies.data.MovieModel;
 import com.paulocaldeira.movies.helpers.FormatHelper;
+import com.paulocaldeira.movies.providers.FavoriteMovieDataProvider;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -37,6 +43,10 @@ public class DetailsActivity extends AppCompatActivity {
     @BindView(R.id.tv_rate) TextView mRateTextView;
     @BindView(R.id.ll_rate_bar) LinearLayout mRateBarLayout;
 
+    // Attributes
+    private MovieModel mMovieModel;
+    private FavoriteMovieDataProvider mFavoriteProvider;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,10 +61,55 @@ public class DetailsActivity extends AppCompatActivity {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        // Movie passed through extra
-        MovieModel movieModel = getExtraMovie();
+        // Favorites provider
+        mFavoriteProvider = new FavoriteMovieDataProvider(this);
 
-        fillLayout(movieModel);
+        // Movie passed through extra
+        mMovieModel = getExtraMovie();
+        mMovieModel.setFavorite(mFavoriteProvider.isFavorite(mMovieModel));
+
+        fillLayout(mMovieModel);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_details, menu);
+
+        MenuItem favoriteItem = menu.findItem(R.id.action_favorite);
+        if (null != favoriteItem) {
+            favoriteItem.setIcon(mMovieModel.isFavorite() ?
+                    R.drawable.ic_favorite_white_24dp :
+                    R.drawable.ic_favorite_border_white_24dp);
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int itemId = item.getItemId();
+
+        switch (itemId) {
+            case R.id.action_favorite:
+                mMovieModel.setFavorite(!mMovieModel.isFavorite());
+
+                item.setIcon(mMovieModel.isFavorite() ?
+                        R.drawable.ic_favorite_white_24dp :
+                        R.drawable.ic_favorite_border_white_24dp);
+
+                if (mMovieModel.isFavorite()) {
+                    mFavoriteProvider.save(mMovieModel);
+                } else {
+                    mFavoriteProvider.remove(mMovieModel);
+                }
+
+                Toast.makeText(this, mMovieModel.isFavorite() ?
+                        getString(R.string.added_to_favorites) :
+                        getString(R.string.removed_from_favorites), Toast.LENGTH_SHORT).show();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     /**

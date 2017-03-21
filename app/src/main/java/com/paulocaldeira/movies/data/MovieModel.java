@@ -14,12 +14,14 @@ import java.util.Date;
  */
 public class MovieModel implements Parcelable {
     // Attributes
+    private long mId;
     private String mTitle;
     private String mSynopsis;
     private String mPosterUrl;
     private String mBackdropUrl;
     private Date mReleaseDate;
     private double mRate;
+    private boolean mFavorite = false;
 
     // Parceable Creator
     public static final Creator<MovieModel> CREATOR = new Creator<MovieModel>() {
@@ -39,12 +41,18 @@ public class MovieModel implements Parcelable {
     }
 
     protected MovieModel(Parcel in) {
+        mId = in.readLong();
         mTitle = in.readString();
         mSynopsis = in.readString();
         mPosterUrl = in.readString();
         mBackdropUrl = in.readString();
         mReleaseDate = FormatHelper.parseDate(in.readString());
         mRate = in.readDouble();
+        mFavorite = in.readByte() != 0;
+    }
+
+    public void setId(long id) {
+        mId = id;
     }
 
     public void setTitle(String title) {
@@ -71,6 +79,14 @@ public class MovieModel implements Parcelable {
         mRate = rate;
     }
 
+    public void setFavorite(boolean favorite) {
+        mFavorite = favorite;
+    }
+
+    public long getId() {
+        return mId;
+    }
+
     public String getTitle() {
         return mTitle;
     }
@@ -95,6 +111,10 @@ public class MovieModel implements Parcelable {
         return mRate;
     }
 
+    public boolean isFavorite() {
+        return mFavorite;
+    }
+
     @Override
     public String toString() {
         return mTitle;
@@ -107,12 +127,14 @@ public class MovieModel implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeLong(mId);
         parcel.writeString(mTitle);
         parcel.writeString(mSynopsis);
         parcel.writeString(mPosterUrl);
         parcel.writeString(mBackdropUrl);
         parcel.writeString(FormatHelper.formatDate(mReleaseDate));
         parcel.writeDouble(mRate);
+        parcel.writeByte((byte) (mFavorite ? 1 : 0));
     }
 
     public static class Builder {
@@ -121,6 +143,15 @@ public class MovieModel implements Parcelable {
 
         public Builder() {
             mMovie = new MovieModel();
+        }
+
+        /**
+         * Sets movie id
+         * @param id Id
+         */
+        public Builder setId(long id) {
+            mMovie.setId(id);
+            return this;
         }
 
         /**
@@ -174,6 +205,15 @@ public class MovieModel implements Parcelable {
          */
         public Builder setRate(double rate) {
             mMovie.setRate(rate);
+            return this;
+        }
+
+        /**
+         * Sets if movie is favorite
+         * @param favorite Favorite
+         */
+        public Builder setFavorite(boolean favorite) {
+            mMovie.setFavorite(favorite);
             return this;
         }
 

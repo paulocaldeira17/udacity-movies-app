@@ -4,8 +4,11 @@ import android.content.Context;
 import android.net.Uri;
 
 import com.paulocaldeira.movies.R;
-import com.paulocaldeira.movies.adapters.MoviesRequestHandlerAdapter;
+import com.paulocaldeira.movies.data.MovieFactory;
 import com.paulocaldeira.movies.data.MovieModel;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.List;
 
@@ -78,12 +81,17 @@ public final class MovieRemoteDataProvider extends RemoteDataProvider implements
         this.request(uriBuilder, new MoviesRequestHandlerAdapter(handler));
     }
 
+    @Override
+    public void getFavorites(int page, RequestHandler<List<MovieModel>> handler) {
+        throw new UnsupportedOperationException("Not implemented.");
+    }
+
     /**
      * Movie Resource
      */
     public static class Builder {
         // Attributes
-        private MovieRemoteDataProvider mDataProvider;
+        private final MovieRemoteDataProvider mDataProvider;
 
         public Builder(Context context) {
             mDataProvider = new MovieRemoteDataProvider(context);
@@ -123,6 +131,44 @@ public final class MovieRemoteDataProvider extends RemoteDataProvider implements
          */
         public MovieRemoteDataProvider build() {
             return mDataProvider;
+        }
+    }
+
+    public class MoviesRequestHandlerAdapter extends JsonRequestHandler {
+        // Attributes
+        private final RequestHandler<List<MovieModel>> mHandler;
+
+        public MoviesRequestHandlerAdapter(RequestHandler<List<MovieModel>> handler) {
+            mHandler = handler;
+        }
+
+        @Override
+        public void beforeRequest() {
+            mHandler.beforeRequest();
+        }
+
+        @Override
+        public void onSuccess(JSONObject response) {
+            try {
+                JSONArray results = response.getJSONArray("results");
+
+                List<MovieModel> movies = MovieFactory.fromJsonArray(results);
+
+                mHandler.onSuccess(movies);
+
+            } catch (Throwable e) {
+                mHandler.onError(e);
+            }
+        }
+
+        @Override
+        public void onError(Throwable e) {
+            mHandler.onError(e);
+        }
+
+        @Override
+        public void onComplete() {
+            mHandler.onComplete();
         }
     }
 }

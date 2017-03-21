@@ -4,9 +4,13 @@
     <string name="movies_database_api_key">[your themoviedb.org api key goes here]</string>
     <string name="movies_database_img_path">https://image.tmdb.org/t/p/w185/</string>
 
+    <!-- Content Provider Configs -->
+    <string name="content_authority">com.paulocaldeira.movies</string>
+
     <!-- Strings -->
     <string name="app_name">Movies</string>
     <string name="top_rated">Top Rated</string>
+    <string name="favorites">Favorites</string>
     <string name="most_popular">Popular</string>
     <string name="details">Details</string>
     <string name="synopsis">Synopsis</string>
@@ -14,8 +18,9 @@
     <string name="year">Year</string>
     <string name="rate">Rate</string>
     <string name="please_check_your_internet_connection">Please check your internet connection</string>
-
-    <!-- Offline data -->
-    <string name="movies_json"></string>
     <string name="an_error_occurred_please_try_again">An error occurred, please try again.</string>
+    <string name="no_results_were_found">No results were found</string>
+    <string name="added_to_favorites">Added to favorites</string>
+    <string name="removed_from_favorites">Removed from favorites</string>
+    <string name="add_to_favorites">Add to favorites</string>
 </resources>

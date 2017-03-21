@@ -4,7 +4,6 @@ import android.accounts.NetworkErrorException;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v4.content.SharedPreferencesCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -19,6 +18,8 @@ import com.paulocaldeira.movies.adapters.MovieRVAdapter;
 import com.paulocaldeira.movies.components.InfiniteRecyclerView;
 import com.paulocaldeira.movies.data.MovieModel;
 import com.paulocaldeira.movies.helpers.PreferencesHelper;
+import com.paulocaldeira.movies.providers.FavoriteMovieDataProvider;
+import com.paulocaldeira.movies.providers.LocalMovieDataProvider;
 import com.paulocaldeira.movies.providers.MovieDataProvider;
 import com.paulocaldeira.movies.providers.MovieRemoteDataProvider;
 import com.paulocaldeira.movies.providers.RequestHandler;
@@ -42,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements
     // List mode
     private static final String MODE_POPULAR = "popular";
     private static final String MODE_TOP_RATED = "top_rated";
+    private static final String MODE_FAVORITES = "favorites";
     private static final String DEFAULT_MODE = MODE_POPULAR;
 
     // Layout
@@ -49,10 +51,15 @@ public class MainActivity extends AppCompatActivity implements
     @BindView(R.id.srl_loader) SwipeRefreshLayout mSwipeRefreshLayout;
     @BindView(R.id.ll_no_internet) LinearLayout mNoInternetLayout;
     @BindView(R.id.ll_request_error) LinearLayout mRequestErrorLayout;
+    @BindView(R.id.ll_no_results) LinearLayout mNoResultsLayout;
 
     private MovieRVAdapter mAdapter;
-    private MovieDataProvider mProvider;
     private ActionBar mActionBar;
+
+    // Providers
+    private MovieDataProvider mProvider;
+    private MovieRemoteDataProvider mRemoteDataProvider;
+    private FavoriteMovieDataProvider mFavoriteDataProvider;
 
     // List mode
     private String mCurrentMode;
@@ -70,13 +77,16 @@ public class MainActivity extends AppCompatActivity implements
         GridLayoutManager gridLayout = new GridLayoutManager(this, DEFAULT_SPAN);
         mRecyclerView.setLayoutManager(gridLayout);
 
-        // Movies Provider
+        // Movies Remote Provider
         MovieRemoteDataProvider.Builder dataProviderBuilder = new MovieRemoteDataProvider.Builder(this);
-        mProvider = dataProviderBuilder
+        mRemoteDataProvider = dataProviderBuilder
                 .setHostResource(R.string.movies_database_api_host)
                 .setApiKeyResource(R.string.movies_database_api_key)
                 .build();
 
+        mFavoriteDataProvider = new FavoriteMovieDataProvider(this);
+
+        // Movies Local Provider
         // mProvider = new LocalMovieDataProvider(this);
 
         // Swipe to refresh listener
@@ -106,18 +116,21 @@ public class MainActivity extends AppCompatActivity implements
             // Set current mode
             mCurrentMode = mode;
 
-            // Clears adapter current items
-            mAdapter.clear();
-
             // Resets recycler view infinite scroll current state
             mRecyclerView.resetState();
 
             switch (mCurrentMode) {
                 case MODE_POPULAR:
                     mActionBar.setTitle(R.string.most_popular);
+                    mProvider = mRemoteDataProvider;
                     break;
                 case MODE_TOP_RATED:
                     mActionBar.setTitle(R.string.top_rated);
+                    mProvider = mRemoteDataProvider;
+                    break;
+                case MODE_FAVORITES:
+                    mActionBar.setTitle(R.string.favorites);
+                    mProvider = mFavoriteDataProvider;
                     break;
             }
 
@@ -146,6 +159,9 @@ public class MainActivity extends AppCompatActivity implements
             case R.id.action_top_rated:
                 PreferencesHelper.setMoviesListMode(this, MODE_TOP_RATED);
                 return true;
+            case R.id.action_favorite:
+                PreferencesHelper.setMoviesListMode(this, MODE_FAVORITES);
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -155,6 +171,9 @@ public class MainActivity extends AppCompatActivity implements
      * Reloads current mode movies
      */
     private void reloadMovies() {
+        // Clears adapter current items
+        mAdapter.clear();
+
         loadMovies(FIRST_PAGE);
     }
 
@@ -169,6 +188,9 @@ public class MainActivity extends AppCompatActivity implements
                 break;
             case MODE_TOP_RATED:
                 loadTopRatedMovies(page);
+                break;
+            case MODE_FAVORITES:
+                loadFavoriteMovies(page);
                 break;
         }
     }
@@ -189,6 +211,14 @@ public class MainActivity extends AppCompatActivity implements
         mProvider.getMostPopular(page, new MoviesRequestHandler());
     }
 
+    /**
+     * Loads favorite movies
+     * @param page Page number
+     */
+    private void loadFavoriteMovies(int page) {
+        mProvider.getFavorites(page, new MoviesRequestHandler());
+    }
+
     @Override
     public void onRefresh() {
         reloadMovies();
@@ -206,12 +236,14 @@ public class MainActivity extends AppCompatActivity implements
         mNoInternetLayout.setVisibility(View.INVISIBLE);
         mRecyclerView.setVisibility(View.VISIBLE);
         mRequestErrorLayout.setVisibility(View.INVISIBLE);
+        mNoResultsLayout.setVisibility(View.INVISIBLE);
     }
 
     private void showError() {
         mNoInternetLayout.setVisibility(View.INVISIBLE);
         mRecyclerView.setVisibility(View.INVISIBLE);
         mRequestErrorLayout.setVisibility(View.VISIBLE);
+        mNoResultsLayout.setVisibility(View.INVISIBLE);
     }
 
     /**
@@ -221,6 +253,17 @@ public class MainActivity extends AppCompatActivity implements
         mNoInternetLayout.setVisibility(View.VISIBLE);
         mRecyclerView.setVisibility(View.INVISIBLE);
         mRequestErrorLayout.setVisibility(View.INVISIBLE);
+        mNoResultsLayout.setVisibility(View.INVISIBLE);
+    }
+
+    /**
+     * Shows no internet alert
+     */
+    private void showNoResults() {
+        mNoInternetLayout.setVisibility(View.INVISIBLE);
+        mRecyclerView.setVisibility(View.INVISIBLE);
+        mRequestErrorLayout.setVisibility(View.INVISIBLE);
+        mNoResultsLayout.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -251,6 +294,11 @@ public class MainActivity extends AppCompatActivity implements
 
         @Override
         public void onSuccess(List<MovieModel> movies) {
+            if (mAdapter.getItemCount() == 0 && null != movies && movies.isEmpty()) {
+                showNoResults();
+                return;
+            }
+
             showItems();
             mAdapter.addItems(movies);
         }

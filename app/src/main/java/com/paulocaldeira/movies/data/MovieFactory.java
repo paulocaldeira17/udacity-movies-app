@@ -1,9 +1,10 @@
 package com.paulocaldeira.movies.data;
 
-import android.util.Log;
+import android.database.Cursor;
 
 import com.paulocaldeira.movies.helpers.FormatHelper;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -32,18 +33,18 @@ public final class MovieFactory {
     public static MovieModel fromJsonObject(JSONObject jsonObject) throws
             JSONException, ParseException {
 
+        long id = jsonObject.getLong("id");
         String title = jsonObject.getString("original_title");
         String synopsis = jsonObject.getString("overview");
         double rate = jsonObject.getDouble("vote_average");
         String posterUrl = jsonObject.getString("poster_path");
         String backdropUrl = jsonObject.getString("backdrop_path");
-
         String dateString = jsonObject.getString("release_date");
-
         Date releaseDate = FormatHelper.parseDate(dateString);
 
         MovieModel.Builder movieBuilder = new MovieModel.Builder();
         return movieBuilder
+                .setId(id)
                 .setTitle(title)
                 .setSynopsis(synopsis)
                 .setReleaseDate(releaseDate)
@@ -54,106 +55,90 @@ public final class MovieFactory {
     }
 
     /**
-     * Generates a new movie
+     * Creates a movie from a json object
+     * @param jsonArray Json array
+     * @return Movie
+     * @throws JSONException Json malformed
+     * @throws ParseException Date malformed
+     */
+    public static List<MovieModel> fromJsonArray(JSONArray jsonArray) throws
+            JSONException, ParseException {
+
+        List<MovieModel> movies = new ArrayList<>();
+
+        if (null != jsonArray) {
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject movieObject = jsonArray.getJSONObject(i);
+
+                movies.add(MovieFactory.fromJsonObject(movieObject));
+            }
+        }
+
+        return movies;
+    }
+
+    /**
+     * Creates a movie from a database cursor
+     * @param cursor Cursor
      * @return Movie
      */
-    public static MovieModel generate() {
-        MovieModel.Builder movieBuilder = new MovieModel.Builder();
+    public static MovieModel fromCursor(Cursor cursor) {
+        if (null == cursor) {
+            return null;
+        }
 
+        int idCol = cursor.getColumnIndex(MoviesContract.FavoriteMovieEntry.COLUMN_ID);
+        int titleCol = cursor.getColumnIndex(MoviesContract.FavoriteMovieEntry.COLUMN_TITLE);
+        int synopsisCol = cursor.getColumnIndex(MoviesContract.FavoriteMovieEntry.COLUMN_SYNOPSIS);
+        int userRatingCol = cursor.getColumnIndex(MoviesContract.FavoriteMovieEntry.COLUMN_USER_RATING);
+        int releaseDateCol = cursor.getColumnIndex(MoviesContract.FavoriteMovieEntry.COLUMN_RELEASE_DATE);
+        int posterImgUrlCol = cursor.getColumnIndex(MoviesContract.FavoriteMovieEntry.COLUMN_POSTER_URL);
+        int backdropImgUrlCol = cursor.getColumnIndex(MoviesContract.FavoriteMovieEntry.COLUMN_BACKDROP_URL);
+        int isFavoriteCol = cursor.getColumnIndex(MoviesContract.FavoriteMovieEntry.COLUMN_FAVORITE);
+
+        long id = cursor.getLong(idCol);
+        String title = cursor.getString(titleCol);
+        String synopsis = cursor.getString(synopsisCol);
+        double rate = cursor.getDouble(userRatingCol);
+        String posterUrl = cursor.getString(posterImgUrlCol);
+        String backdropUrl = cursor.getString(backdropImgUrlCol);
+        boolean isFavorite = cursor.getInt(isFavoriteCol) != 0;
+
+        String dateString = cursor.getString(releaseDateCol);
+
+        Date releaseDate = FormatHelper.parseDate(dateString);
+
+        MovieModel.Builder movieBuilder = new MovieModel.Builder();
         return movieBuilder
-                .setTitle(generateTitle())
-                .setSynopsis(generateDescription())
-                .setReleaseDate(genereateYear())
-                .setRate(generateRate())
+                .setId(id)
+                .setTitle(title)
+                .setSynopsis(synopsis)
+                .setReleaseDate(releaseDate)
+                .setRate(rate)
+                .setPosterUrl(posterUrl)
+                .setBackdropUrl(backdropUrl)
+                .setFavorite(isFavorite)
                 .build();
     }
 
     /**
-     * Generates rate
-     * @return Rate
+     * Creates a movie from a database cursor
+     * @param cursor Cursor
+     * @return Movie
      */
-    private static double generateRate() {
-        List<Double> rates = new ArrayList<>();
-        rates.add(8.1d);
-        rates.add(7.4d);
-        rates.add(9.2d);
-        rates.add(6.3d);
+    public static List<MovieModel> fromCursorMultiple(Cursor cursor) {
+        List<MovieModel> movies = new ArrayList<>();
 
-        return randDouble(rates);
-    }
+        if (null != cursor) {
+            while (cursor.moveToNext()) {
+                MovieModel model = MovieFactory.fromCursor(cursor);
+                if (null != model) {
+                    movies.add(model);
+                }
+            }
+            cursor.close();
+        }
 
-    /**
-     * Generates year
-     * @return Year
-     */
-    private static Date genereateYear() {
-        List<Date> years = new ArrayList<>();
-        years.add(new Date(2017, 1, 12));
-        years.add(new Date(2016, 3, 23));
-        years.add(new Date(2015, 8, 25));
-        years.add(new Date(1991, 10, 01));
-
-        return randDate(years);
-    }
-
-    /**
-     * Generates description
-     * @return Description
-     */
-    private static String generateDescription() {
-        return "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\n" +
-                "tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,\n" +
-                "quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo\n" +
-                "consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse\n" +
-                "cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\n" +
-                "proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
-    }
-
-    /**
-     * Generates title
-     * @return Title
-     */
-    private static String generateTitle() {
-        List<String> titles = new ArrayList<>();
-        titles.add("Titanic");
-        titles.add("Mirrors");
-        titles.add("Mirrors 2");
-        titles.add("American Pie - Reunion");
-        titles.add("Lord of the Rings");
-
-        return randString(titles);
-    }
-
-    /**
-     * Random double
-     * @param items Items
-     * @return Random item
-     */
-    private static Double randDouble(List<Double> items) {
-        Random r = new Random();
-        int pos = r.nextInt(items.size());
-        return items.get(pos);
-    }
-
-    /**
-     * Random string
-     * @param items Items
-     * @return Random item
-     */
-    private static String randString(List<String> items) {
-        Random r = new Random();
-        int pos = r.nextInt(items.size());
-        return items.get(pos);
-    }
-
-    /**
-     * Random date
-     * @param items Items
-     * @return Random item
-     */
-    private static Date randDate(List<Date> items) {
-        Random r = new Random();
-        int pos = r.nextInt(items.size());
-        return items.get(pos);
+        return movies;
     }
 }

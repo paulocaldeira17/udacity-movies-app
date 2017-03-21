@@ -28,6 +28,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.paulocaldeira.movies.MainActivity"/>
         </activity>
+        <provider
+            android:authorities="@string/content_authority"
+            android:name=".providers.MoviesContentProvider"
+            android:exported="false"/>
     </application>
 
 </manifest>
