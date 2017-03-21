@@ -4,21 +4,21 @@ import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.paulocaldeira.movies.data.MovieModel;
+import com.paulocaldeira.movies.data.Movie;
 import com.paulocaldeira.movies.helpers.FormatHelper;
 import com.paulocaldeira.movies.providers.FavoriteMovieDataProvider;
+import com.paulocaldeira.movies.providers.MovieDetailsDataProvider;
+import com.paulocaldeira.movies.providers.MovieRemoteDataProvider;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -44,8 +44,9 @@ public class DetailsActivity extends AppCompatActivity {
     @BindView(R.id.ll_rate_bar) LinearLayout mRateBarLayout;
 
     // Attributes
-    private MovieModel mMovieModel;
+    private Movie mMovie;
     private FavoriteMovieDataProvider mFavoriteProvider;
+    private MovieDetailsDataProvider mProvider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,11 +65,18 @@ public class DetailsActivity extends AppCompatActivity {
         // Favorites provider
         mFavoriteProvider = new FavoriteMovieDataProvider(this);
 
-        // Movie passed through extra
-        mMovieModel = getExtraMovie();
-        mMovieModel.setFavorite(mFavoriteProvider.isFavorite(mMovieModel));
+        // Movies Remote Provider
+        MovieRemoteDataProvider.Builder dataProviderBuilder = new MovieRemoteDataProvider.Builder(this);
+        mProvider = dataProviderBuilder
+                .setHostResource(R.string.movies_database_api_host)
+                .setApiKeyResource(R.string.movies_database_api_key)
+                .build();
 
-        fillLayout(mMovieModel);
+        // Movie passed through extra
+        mMovie = getExtraMovie();
+        mMovie.setFavorite(mFavoriteProvider.isFavorite(mMovie));
+
+        fillLayout(mMovie);
     }
 
     @Override
@@ -77,7 +85,7 @@ public class DetailsActivity extends AppCompatActivity {
 
         MenuItem favoriteItem = menu.findItem(R.id.action_favorite);
         if (null != favoriteItem) {
-            favoriteItem.setIcon(mMovieModel.isFavorite() ?
+            favoriteItem.setIcon(mMovie.isFavorite() ?
                     R.drawable.ic_favorite_white_24dp :
                     R.drawable.ic_favorite_border_white_24dp);
         }
@@ -91,19 +99,19 @@ public class DetailsActivity extends AppCompatActivity {
 
         switch (itemId) {
             case R.id.action_favorite:
-                mMovieModel.setFavorite(!mMovieModel.isFavorite());
+                mMovie.setFavorite(!mMovie.isFavorite());
 
-                item.setIcon(mMovieModel.isFavorite() ?
+                item.setIcon(mMovie.isFavorite() ?
                         R.drawable.ic_favorite_white_24dp :
                         R.drawable.ic_favorite_border_white_24dp);
 
-                if (mMovieModel.isFavorite()) {
-                    mFavoriteProvider.save(mMovieModel);
+                if (mMovie.isFavorite()) {
+                    mFavoriteProvider.save(mMovie);
                 } else {
-                    mFavoriteProvider.remove(mMovieModel);
+                    mFavoriteProvider.remove(mMovie);
                 }
 
-                Toast.makeText(this, mMovieModel.isFavorite() ?
+                Toast.makeText(this, mMovie.isFavorite() ?
                         getString(R.string.added_to_favorites) :
                         getString(R.string.removed_from_favorites), Toast.LENGTH_SHORT).show();
                 return true;
@@ -114,21 +122,22 @@ public class DetailsActivity extends AppCompatActivity {
 
     /**
      * Fills layout components
-     * @param movieModel Movie Model
+     * @param movie Movie Model
      */
-    private void fillLayout(MovieModel movieModel) {
-        String releaseDate = FormatHelper.formatYear(movieModel.getReleaseDate());
-        String title = String.format("%s (%s)", movieModel.getTitle(), releaseDate);
+    private void fillLayout(Movie movie) {
+        String releaseDate = FormatHelper.formatYear(movie.getReleaseDate());
+        String title = String.format("%s (%s)", movie.getTitle(), releaseDate);
 
         String imgPath = getString(R.string.movies_database_img_path);
 
         // Load backdrop image
         Picasso.with(this)
-                .load(imgPath + movieModel.getBackdropUrl())
+                .load(imgPath + movie.getBackdropUrl())
                 .into(mBackdropImageView);
+
         // Load poster image
         Picasso.with(this)
-                .load(imgPath + movieModel.getPosterUrl())
+                .load(imgPath + movie.getPosterUrl())
                 .placeholder(R.drawable.ic_image_grey_400_48dp)
                 .error(R.drawable.ic_broken_image_grey_400_48dp)
                 .into(mPosterImageView, new Callback() {
@@ -144,19 +153,19 @@ public class DetailsActivity extends AppCompatActivity {
                 });
 
         mCollapsingLayout.setTitle(title);
-        mTitleTextView.setText(movieModel.getTitle());
-        mSynopsisTextView.setText(movieModel.getSynopsis());
+        mTitleTextView.setText(movie.getTitle());
+        mSynopsisTextView.setText(movie.getSynopsis());
         mYearTextView.setText(releaseDate);
 
         // Creates an animation
-        animateWithRate(movieModel.getRate());
+        animateWithRate(movie.getRate());
     }
 
     /**
      * Returns extra movie
      * @return Movie model
      */
-    private MovieModel getExtraMovie() {
+    private Movie getExtraMovie() {
         Intent intent = getIntent();
         if (intent != null) {
 

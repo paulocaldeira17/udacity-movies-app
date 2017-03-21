@@ -4,8 +4,8 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 
-import com.paulocaldeira.movies.data.MovieFactory;
-import com.paulocaldeira.movies.data.MovieModel;
+import com.paulocaldeira.movies.factories.MovieFactory;
+import com.paulocaldeira.movies.data.Movie;
 import com.paulocaldeira.movies.data.MoviesContract;
 import com.paulocaldeira.movies.helpers.FormatHelper;
 
@@ -28,17 +28,17 @@ public final class FavoriteMovieDataProvider implements MovieDataProvider {
     }
 
     @Override
-    public void getTopRated(int page, final RequestHandler<List<MovieModel>> handler) {
+    public void getTopRated(int page, final RequestHandler<List<Movie>> handler) {
         throw new UnsupportedOperationException("Not implemented");
     }
 
     @Override
-    public void getMostPopular(int page, final RequestHandler<List<MovieModel>> handler) {
+    public void getMostPopular(int page, final RequestHandler<List<Movie>> handler) {
         throw new UnsupportedOperationException("Not implemented");
     }
 
     @Override
-    public void getFavorites(int page, final RequestHandler<List<MovieModel>> handler) {
+    public void getFavorites(int page, final RequestHandler<List<Movie>> handler) {
         Cursor cursor = mContext.getContentResolver().query(
                 MoviesContract.FavoriteMovieEntry.buildMoviesPageUri(page),
                 null,
@@ -48,7 +48,7 @@ public final class FavoriteMovieDataProvider implements MovieDataProvider {
         );
 
         // Load from local
-        List<MovieModel> movies = MovieFactory.fromCursorMultiple(cursor);
+        List<Movie> movies = MovieFactory.fromCursorMultiple(cursor);
 
         handler.beforeRequest();
         handler.onSuccess(movies);
@@ -59,7 +59,7 @@ public final class FavoriteMovieDataProvider implements MovieDataProvider {
      * Saves a favorite movie
      * @param movie Movie
      */
-    public void save(MovieModel movie) {
+    public void save(Movie movie) {
         if (null == movie) {
             return;
         }
@@ -85,7 +85,7 @@ public final class FavoriteMovieDataProvider implements MovieDataProvider {
      * Removes a favorite movie
      * @param movie Movie
      */
-    public void remove(MovieModel movie) {
+    public void remove(Movie movie) {
         if (null == movie) {
             return;
         }
@@ -101,7 +101,7 @@ public final class FavoriteMovieDataProvider implements MovieDataProvider {
      * Removes a favorite movie
      * @param movie Movie
      */
-    public boolean isFavorite(MovieModel movie) {
+    public boolean isFavorite(Movie movie) {
         if (null == movie) {
              return false;
         }

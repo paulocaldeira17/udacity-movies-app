@@ -3,8 +3,8 @@ package com.paulocaldeira.movies.providers;
 import android.content.Context;
 import android.database.Cursor;
 
-import com.paulocaldeira.movies.data.MovieFactory;
-import com.paulocaldeira.movies.data.MovieModel;
+import com.paulocaldeira.movies.data.Movie;
+import com.paulocaldeira.movies.factories.MovieFactory;
 import com.paulocaldeira.movies.data.MoviesContract;
 
 import java.util.List;
@@ -26,7 +26,7 @@ public final class LocalMovieDataProvider implements MovieDataProvider {
     }
 
     @Override
-    public void getTopRated(int page, final RequestHandler<List<MovieModel>> handler) {
+    public void getTopRated(int page, final RequestHandler<List<Movie>> handler) {
         Cursor cursor = mContext.getContentResolver().query(
                 MoviesContract.FavoriteMovieEntry.buildMoviesPageUri(page),
                 null,
@@ -36,14 +36,14 @@ public final class LocalMovieDataProvider implements MovieDataProvider {
         );
 
         // Load from local
-        List<MovieModel> movies = MovieFactory.fromCursorMultiple(cursor);
+        List<Movie> movies = MovieFactory.fromCursorMultiple(cursor);
         handler.beforeRequest();
         handler.onSuccess(movies);
         handler.onComplete();
     }
 
     @Override
-    public void getMostPopular(int page, final RequestHandler<List<MovieModel>> handler) {
+    public void getMostPopular(int page, final RequestHandler<List<Movie>> handler) {
         Cursor cursor = mContext.getContentResolver().query(
                 MoviesContract.FavoriteMovieEntry.buildMoviesPageUri(page),
                 null,
@@ -53,14 +53,14 @@ public final class LocalMovieDataProvider implements MovieDataProvider {
         );
 
         // Load from local
-        List<MovieModel> movies = MovieFactory.fromCursorMultiple(cursor);
+        List<Movie> movies = MovieFactory.fromCursorMultiple(cursor);
         handler.beforeRequest();
         handler.onSuccess(movies);
         handler.onComplete();
     }
 
     @Override
-    public void getFavorites(int page, final RequestHandler<List<MovieModel>> handler) {
+    public void getFavorites(int page, final RequestHandler<List<Movie>> handler) {
         Cursor cursor = mContext.getContentResolver().query(
                 MoviesContract.FavoriteMovieEntry.buildMoviesPageUri(page),
                 null,
@@ -70,7 +70,7 @@ public final class LocalMovieDataProvider implements MovieDataProvider {
         );
 
         // Load from local
-        List<MovieModel> movies = MovieFactory.fromCursorMultiple(cursor);
+        List<Movie> movies = MovieFactory.fromCursorMultiple(cursor);
         handler.beforeRequest();
         handler.onSuccess(movies);
         handler.onComplete();

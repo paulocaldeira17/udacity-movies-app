@@ -16,10 +16,9 @@ import android.widget.LinearLayout;
 
 import com.paulocaldeira.movies.adapters.MovieRVAdapter;
 import com.paulocaldeira.movies.components.InfiniteRecyclerView;
-import com.paulocaldeira.movies.data.MovieModel;
+import com.paulocaldeira.movies.data.Movie;
 import com.paulocaldeira.movies.helpers.PreferencesHelper;
 import com.paulocaldeira.movies.providers.FavoriteMovieDataProvider;
-import com.paulocaldeira.movies.providers.LocalMovieDataProvider;
 import com.paulocaldeira.movies.providers.MovieDataProvider;
 import com.paulocaldeira.movies.providers.MovieRemoteDataProvider;
 import com.paulocaldeira.movies.providers.RequestHandler;
@@ -267,7 +266,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onMovieImageClicked(MovieModel movie) {
+    public void onMovieImageClicked(Movie movie) {
         Intent intent = new Intent(this, DetailsActivity.class);
 
         // Pass movie (parceable) through extra
@@ -286,14 +285,14 @@ public class MainActivity extends AppCompatActivity implements
     /**
      * Movies request Handler
      */
-    private class MoviesRequestHandler implements RequestHandler<List<MovieModel>> {
+    private class MoviesRequestHandler implements RequestHandler<List<Movie>> {
         @Override
         public void beforeRequest() {
             mSwipeRefreshLayout.setRefreshing(true);
         }
 
         @Override
-        public void onSuccess(List<MovieModel> movies) {
+        public void onSuccess(List<Movie> movies) {
             if (mAdapter.getItemCount() == 0 && null != movies && movies.isEmpty()) {
                 showNoResults();
                 return;

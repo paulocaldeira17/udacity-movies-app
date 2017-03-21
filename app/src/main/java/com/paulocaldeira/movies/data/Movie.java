@@ -8,11 +8,11 @@ import com.paulocaldeira.movies.helpers.FormatHelper;
 import java.util.Date;
 
 /**
- * Movie Model Class
+ * Movie Class
  * @author Paulo Caldeira <paulocaldeira17@gmail.com>
  * @created 1/31/17
  */
-public class MovieModel implements Parcelable {
+public class Movie implements Parcelable {
     // Attributes
     private long mId;
     private String mTitle;
@@ -23,24 +23,11 @@ public class MovieModel implements Parcelable {
     private double mRate;
     private boolean mFavorite = false;
 
-    // Parceable Creator
-    public static final Creator<MovieModel> CREATOR = new Creator<MovieModel>() {
-        @Override
-        public MovieModel createFromParcel(Parcel in) {
-            return new MovieModel(in);
-        }
-
-        @Override
-        public MovieModel[] newArray(int size) {
-            return new MovieModel[size];
-        }
-    };
-
-    public MovieModel() {
+    public Movie() {
         //
     }
 
-    protected MovieModel(Parcel in) {
+    protected Movie(Parcel in) {
         mId = in.readLong();
         mTitle = in.readString();
         mSynopsis = in.readString();
@@ -137,12 +124,25 @@ public class MovieModel implements Parcelable {
         parcel.writeByte((byte) (mFavorite ? 1 : 0));
     }
 
+    // Parceable Creator
+    public static final Creator<Movie> CREATOR = new Creator<Movie>() {
+        @Override
+        public Movie createFromParcel(Parcel in) {
+            return new Movie(in);
+        }
+
+        @Override
+        public Movie[] newArray(int size) {
+            return new Movie[size];
+        }
+    };
+
     public static class Builder {
         // Attributes
-        private MovieModel mMovie;
+        private Movie mMovie;
 
         public Builder() {
-            mMovie = new MovieModel();
+            mMovie = new Movie();
         }
 
         /**
@@ -221,7 +221,7 @@ public class MovieModel implements Parcelable {
          * Returns built movie
          * @return Movie
          */
-        public MovieModel build() {
+        public Movie build() {
             return mMovie;
         }
     }

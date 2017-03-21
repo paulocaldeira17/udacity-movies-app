@@ -4,8 +4,12 @@ import android.content.Context;
 import android.net.Uri;
 
 import com.paulocaldeira.movies.R;
-import com.paulocaldeira.movies.data.MovieFactory;
-import com.paulocaldeira.movies.data.MovieModel;
+import com.paulocaldeira.movies.factories.MovieFactory;
+import com.paulocaldeira.movies.data.Movie;
+import com.paulocaldeira.movies.data.MovieReview;
+import com.paulocaldeira.movies.data.MovieVideo;
+import com.paulocaldeira.movies.factories.MovieReviewFactory;
+import com.paulocaldeira.movies.factories.MovieVideoFactory;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -17,15 +21,21 @@ import java.util.List;
  * @author Paulo Caldeira <paulocaldeira17@gmail.com>
  * @created 1/31/17
  */
-public final class MovieRemoteDataProvider extends RemoteDataProvider implements MovieDataProvider {
+public final class MovieRemoteDataProvider extends RemoteDataProvider implements
+        MovieDataProvider,
+        MovieDetailsDataProvider {
 
     // Constants
     private static final String PARAM_API_KEY = "api_key";
     private static final String PARAM_PAGE = "page";
 
     // Paths
-    private static final String PATH_TOP_RATED = "/3/movie/top_rated";
-    private static final String PATH_POPULAR = "/3/movie/popular";
+    private static final String PATH_VERSION = "/3";
+    private static final String PATH_MOVIE = PATH_VERSION + "/movie";
+    private static final String PATH_POPULAR = PATH_MOVIE + "/popular";
+    private static final String PATH_TOP_RATED = PATH_MOVIE + "/top_rated";
+    private static final String PATH_VIDEOS = "/videos";
+    private static final String PATH_REVIEWS = "/reviews";
 
     public static int HOST_RESOURCE_ID = R.string.movies_database_api_host;
     public static int API_KEY_RESOURCE_ID = R.string.movies_database_api_key;
@@ -64,26 +74,47 @@ public final class MovieRemoteDataProvider extends RemoteDataProvider implements
     }
 
     @Override
-    public void getTopRated(int page, RequestHandler<List<MovieModel>> handler) {
+    public void getTopRated(int page, final RequestHandler<List<Movie>> handler) {
         Uri.Builder uriBuilder = baseUri();
         uriBuilder.path(PATH_TOP_RATED)
                 .appendQueryParameter(PARAM_PAGE, "" + page);
 
-        this.request(uriBuilder, new MoviesRequestHandlerAdapter(handler));
+        this.request(uriBuilder, new MovieJsonRequestHandlerAdapter(handler));
     }
 
     @Override
-    public void getMostPopular(int page, RequestHandler<List<MovieModel>> handler) {
+    public void getMostPopular(int page, final RequestHandler<List<Movie>> handler) {
         Uri.Builder uriBuilder = baseUri();
         uriBuilder.path(PATH_POPULAR)
                 .appendQueryParameter(PARAM_PAGE, "" + page);
 
-        this.request(uriBuilder, new MoviesRequestHandlerAdapter(handler));
+        this.request(uriBuilder, new MovieJsonRequestHandlerAdapter(handler));
     }
 
     @Override
-    public void getFavorites(int page, RequestHandler<List<MovieModel>> handler) {
+    public void getFavorites(int page, RequestHandler<List<Movie>> handler) {
         throw new UnsupportedOperationException("Not implemented.");
+    }
+
+    @Override
+    public void getVideos(long movieId, RequestHandler<List<MovieVideo>> handler) {
+        Uri.Builder uriBuilder = baseUri();
+        uriBuilder.path(PATH_MOVIE)
+                .appendPath("/" + movieId)
+                .appendPath(PATH_VIDEOS);
+
+        this.request(uriBuilder, new MovieVideoJsonRequestHandlerAdapter(handler));
+    }
+
+    @Override
+    public void getReviews(long movieId, int page, RequestHandler<List<MovieReview>> handler) {
+        Uri.Builder uriBuilder = baseUri();
+        uriBuilder.path(PATH_MOVIE)
+                .appendPath("/" + movieId)
+                .appendPath(PATH_REVIEWS)
+                .appendQueryParameter(PARAM_PAGE, "" + page);
+
+        this.request(uriBuilder, new MovieReviewJsonRequestHandlerAdapter(handler));
     }
 
     /**
@@ -134,31 +165,17 @@ public final class MovieRemoteDataProvider extends RemoteDataProvider implements
         }
     }
 
-    public class MoviesRequestHandlerAdapter extends JsonRequestHandler {
+    public abstract class BaseJsonRequestHandlerAdapter<T> extends JsonRequestHandler {
         // Attributes
-        private final RequestHandler<List<MovieModel>> mHandler;
+        protected final RequestHandler<T> mHandler;
 
-        public MoviesRequestHandlerAdapter(RequestHandler<List<MovieModel>> handler) {
+        public BaseJsonRequestHandlerAdapter(RequestHandler<T> handler) {
             mHandler = handler;
         }
 
         @Override
         public void beforeRequest() {
             mHandler.beforeRequest();
-        }
-
-        @Override
-        public void onSuccess(JSONObject response) {
-            try {
-                JSONArray results = response.getJSONArray("results");
-
-                List<MovieModel> movies = MovieFactory.fromJsonArray(results);
-
-                mHandler.onSuccess(movies);
-
-            } catch (Throwable e) {
-                mHandler.onError(e);
-            }
         }
 
         @Override
@@ -169,6 +186,63 @@ public final class MovieRemoteDataProvider extends RemoteDataProvider implements
         @Override
         public void onComplete() {
             mHandler.onComplete();
+        }
+    }
+
+    public class MovieJsonRequestHandlerAdapter<T> extends BaseJsonRequestHandlerAdapter<List<Movie>> {
+        public MovieJsonRequestHandlerAdapter(RequestHandler<List<Movie>> handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onSuccess(JSONObject response) {
+            try {
+                JSONArray results = response.getJSONArray("results");
+
+                List<Movie> movies = MovieFactory.fromJsonArray(results);
+
+                mHandler.onSuccess(movies);
+            } catch (Throwable e) {
+                mHandler.onError(e);
+            }
+        }
+    }
+
+    public class MovieReviewJsonRequestHandlerAdapter<T> extends BaseJsonRequestHandlerAdapter<List<MovieReview>> {
+        public MovieReviewJsonRequestHandlerAdapter(RequestHandler<List<MovieReview>> handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onSuccess(JSONObject response) {
+            try {
+                JSONArray results = response.getJSONArray("results");
+
+                List<MovieReview> reviews = MovieReviewFactory.fromJsonArray(results);
+
+                mHandler.onSuccess(reviews);
+            } catch (Throwable e) {
+                mHandler.onError(e);
+            }
+        }
+    }
+
+    public class MovieVideoJsonRequestHandlerAdapter<T> extends BaseJsonRequestHandlerAdapter<List<MovieVideo>> {
+        public MovieVideoJsonRequestHandlerAdapter(RequestHandler<List<MovieVideo>> handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onSuccess(JSONObject response) {
+            try {
+                JSONArray results = response.getJSONArray("results");
+
+                List<MovieVideo> videos = MovieVideoFactory.fromJsonArray(results);
+
+                mHandler.onSuccess(videos);
+            } catch (Throwable e) {
+                mHandler.onError(e);
+            }
         }
     }
 }

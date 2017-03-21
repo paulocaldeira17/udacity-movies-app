@@ -1,7 +1,9 @@
-package com.paulocaldeira.movies.data;
+package com.paulocaldeira.movies.factories;
 
 import android.database.Cursor;
 
+import com.paulocaldeira.movies.data.Movie;
+import com.paulocaldeira.movies.data.MoviesContract;
 import com.paulocaldeira.movies.helpers.FormatHelper;
 
 import org.json.JSONArray;
@@ -12,7 +14,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Movie Model Factory Class
@@ -30,7 +31,7 @@ public final class MovieFactory {
      * @throws JSONException Json malformed
      * @throws ParseException Date malformed
      */
-    public static MovieModel fromJsonObject(JSONObject jsonObject) throws
+    public static Movie fromJsonObject(JSONObject jsonObject) throws
             JSONException, ParseException {
 
         long id = jsonObject.getLong("id");
@@ -42,7 +43,7 @@ public final class MovieFactory {
         String dateString = jsonObject.getString("release_date");
         Date releaseDate = FormatHelper.parseDate(dateString);
 
-        MovieModel.Builder movieBuilder = new MovieModel.Builder();
+        Movie.Builder movieBuilder = new Movie.Builder();
         return movieBuilder
                 .setId(id)
                 .setTitle(title)
@@ -61,10 +62,10 @@ public final class MovieFactory {
      * @throws JSONException Json malformed
      * @throws ParseException Date malformed
      */
-    public static List<MovieModel> fromJsonArray(JSONArray jsonArray) throws
+    public static List<Movie> fromJsonArray(JSONArray jsonArray) throws
             JSONException, ParseException {
 
-        List<MovieModel> movies = new ArrayList<>();
+        List<Movie> movies = new ArrayList<>();
 
         if (null != jsonArray) {
             for (int i = 0; i < jsonArray.length(); i++) {
@@ -82,7 +83,7 @@ public final class MovieFactory {
      * @param cursor Cursor
      * @return Movie
      */
-    public static MovieModel fromCursor(Cursor cursor) {
+    public static Movie fromCursor(Cursor cursor) {
         if (null == cursor) {
             return null;
         }
@@ -108,7 +109,7 @@ public final class MovieFactory {
 
         Date releaseDate = FormatHelper.parseDate(dateString);
 
-        MovieModel.Builder movieBuilder = new MovieModel.Builder();
+        Movie.Builder movieBuilder = new Movie.Builder();
         return movieBuilder
                 .setId(id)
                 .setTitle(title)
@@ -126,12 +127,12 @@ public final class MovieFactory {
      * @param cursor Cursor
      * @return Movie
      */
-    public static List<MovieModel> fromCursorMultiple(Cursor cursor) {
-        List<MovieModel> movies = new ArrayList<>();
+    public static List<Movie> fromCursorMultiple(Cursor cursor) {
+        List<Movie> movies = new ArrayList<>();
 
         if (null != cursor) {
             while (cursor.moveToNext()) {
-                MovieModel model = MovieFactory.fromCursor(cursor);
+                Movie model = MovieFactory.fromCursor(cursor);
                 if (null != model) {
                     movies.add(model);
                 }

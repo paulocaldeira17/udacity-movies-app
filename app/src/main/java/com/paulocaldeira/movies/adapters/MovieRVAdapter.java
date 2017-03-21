@@ -6,10 +6,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.paulocaldeira.movies.R;
-import com.paulocaldeira.movies.data.MovieModel;
+import com.paulocaldeira.movies.data.Movie;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -19,7 +18,7 @@ import com.squareup.picasso.Picasso;
  * @created 1/31/17
  */
 
-public class MovieRVAdapter extends InfiniteRVAdapter<MovieModel, MovieRVAdapter.MovieViewHolder> {
+public class MovieRVAdapter extends InfiniteRVAdapter<Movie, MovieRVAdapter.MovieViewHolder> {
 
     // Attributes
     protected OnMovieItemClickListener mItemClickListener;
@@ -38,7 +37,7 @@ public class MovieRVAdapter extends InfiniteRVAdapter<MovieModel, MovieRVAdapter
     @Override
     public void onBindViewHolder(final MovieViewHolder holder, int position) {
         final Context context = holder.itemView.getContext();
-        MovieModel movie = mItems.get(position);
+        Movie movie = mItems.get(position);
 
         Picasso.with(context)
                 .load(context.getString(R.string.movies_database_img_path) + movie.getPosterUrl())
@@ -66,18 +65,18 @@ public class MovieRVAdapter extends InfiniteRVAdapter<MovieModel, MovieRVAdapter
     }
 
     /**
-     * MovieModel Click Listener Interface
+     * Movie Click Listener Interface
      */
     public interface OnMovieItemClickListener {
         /**
-         * On MovieModel Click
-         * @param movie MovieModel
+         * On Movie Click
+         * @param movie Movie
          */
-        void onMovieImageClicked(MovieModel movie);
+        void onMovieImageClicked(Movie movie);
     }
 
     /**
-     * MovieModel View Holder
+     * Movie View Holder
      */
     public final class MovieViewHolder extends RecyclerView.ViewHolder implements
             View.OnClickListener {
