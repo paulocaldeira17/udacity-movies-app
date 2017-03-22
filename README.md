@@ -1,4 +1,4 @@
-# Popular Movies, Stage 1
+# Popular Movies, Stage 2
 
 This repo refers to the first stage of The Movies Database Application.
 
