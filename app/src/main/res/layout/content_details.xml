@@ -178,6 +178,126 @@
 
         </LinearLayout>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+            android:padding="@dimen/activity_padding"
+
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                android:layout_marginBottom="@dimen/activity_vertical_margin"
+
+                android:text="@string/trailers"
+
+                style="@style/TextAppearance.AppCompat.Large"/>
+
+            <com.paulocaldeira.movies.components.InfiniteRecyclerView
+                android:id="@+id/rv_movie_videos"
+
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+
+                android:visibility="gone" />
+
+            <ProgressBar
+                android:id="@+id/pb_movie_videos"
+
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:layout_gravity="center"/>
+
+            <TextView
+                android:id="@+id/tv_no_results_movie_videos"
+
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                style="@style/TextAppearance.AppCompat.Medium"
+
+                android:text="@string/no_results_were_found"
+
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/tv_error_movie_videos"
+
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                style="@style/TextAppearance.AppCompat.Medium"
+
+                android:text="@string/an_error_occurred_please_try_again"
+
+                android:visibility="gone"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+            android:padding="@dimen/activity_padding"
+
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                android:layout_marginBottom="@dimen/activity_vertical_margin"
+
+                android:text="@string/reviews"
+
+                style="@style/TextAppearance.AppCompat.Large"/>
+
+            <com.paulocaldeira.movies.components.InfiniteRecyclerView
+                android:id="@+id/rv_movie_reviews"
+
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+
+                android:visibility="gone" />
+
+            <ProgressBar
+                android:id="@+id/pb_movie_reviews"
+
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:layout_gravity="center"/>
+
+            <TextView
+                android:id="@+id/tv_no_results_movie_reviews"
+
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                style="@style/TextAppearance.AppCompat.Medium"
+
+                android:text="@string/no_results_were_found"
+
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/tv_error_movie_reviews"
+
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                style="@style/TextAppearance.AppCompat.Medium"
+
+                android:text="@string/an_error_occurred_please_try_again"
+
+                android:visibility="gone"/>
+
+        </LinearLayout>
+
     </LinearLayout>
 
 </android.support.v4.widget.NestedScrollView>

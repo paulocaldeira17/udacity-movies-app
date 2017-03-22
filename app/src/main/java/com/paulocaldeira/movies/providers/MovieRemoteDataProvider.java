@@ -34,8 +34,8 @@ public final class MovieRemoteDataProvider extends RemoteDataProvider implements
     private static final String PATH_MOVIE = PATH_VERSION + "/movie";
     private static final String PATH_POPULAR = PATH_MOVIE + "/popular";
     private static final String PATH_TOP_RATED = PATH_MOVIE + "/top_rated";
-    private static final String PATH_VIDEOS = "/videos";
-    private static final String PATH_REVIEWS = "/reviews";
+    private static final String PARTIAL_PATH_VIDEOS = "videos";
+    private static final String PARTIAL_PATH_REVIEWS = "reviews";
 
     public static int HOST_RESOURCE_ID = R.string.movies_database_api_host;
     public static int API_KEY_RESOURCE_ID = R.string.movies_database_api_key;
@@ -100,8 +100,8 @@ public final class MovieRemoteDataProvider extends RemoteDataProvider implements
     public void getVideos(long movieId, RequestHandler<List<MovieVideo>> handler) {
         Uri.Builder uriBuilder = baseUri();
         uriBuilder.path(PATH_MOVIE)
-                .appendPath("/" + movieId)
-                .appendPath(PATH_VIDEOS);
+                .appendEncodedPath("" + movieId)
+                .appendEncodedPath(PARTIAL_PATH_VIDEOS);
 
         this.request(uriBuilder, new MovieVideoJsonRequestHandlerAdapter(handler));
     }
@@ -110,8 +110,8 @@ public final class MovieRemoteDataProvider extends RemoteDataProvider implements
     public void getReviews(long movieId, int page, RequestHandler<List<MovieReview>> handler) {
         Uri.Builder uriBuilder = baseUri();
         uriBuilder.path(PATH_MOVIE)
-                .appendPath("/" + movieId)
-                .appendPath(PATH_REVIEWS)
+                .appendEncodedPath("" + movieId)
+                .appendEncodedPath(PARTIAL_PATH_REVIEWS)
                 .appendQueryParameter(PARAM_PAGE, "" + page);
 
         this.request(uriBuilder, new MovieReviewJsonRequestHandlerAdapter(handler));
@@ -203,6 +203,7 @@ public final class MovieRemoteDataProvider extends RemoteDataProvider implements
 
                 mHandler.onSuccess(movies);
             } catch (Throwable e) {
+                e.printStackTrace();
                 mHandler.onError(e);
             }
         }
@@ -222,6 +223,7 @@ public final class MovieRemoteDataProvider extends RemoteDataProvider implements
 
                 mHandler.onSuccess(reviews);
             } catch (Throwable e) {
+                e.printStackTrace();
                 mHandler.onError(e);
             }
         }
@@ -241,6 +243,7 @@ public final class MovieRemoteDataProvider extends RemoteDataProvider implements
 
                 mHandler.onSuccess(videos);
             } catch (Throwable e) {
+                e.printStackTrace();
                 mHandler.onError(e);
             }
         }

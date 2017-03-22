@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="horizontal"
+
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+
+              android:background="?selectableItemBackground"
+
+              android:padding="@dimen/activity_padding">
+
+    <TextView
+        android:id="@+id/tv_video_name"
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:layout_weight="1"
+
+        android:layout_gravity="center_vertical"
+
+        style="@style/Base.TextAppearance.AppCompat.Medium"/>
+
+    <ImageView
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+
+        android:layout_gravity="center"
+
+        android:src="@drawable/ic_play_arrow_grey_600_24dp"/>
+
+</LinearLayout>

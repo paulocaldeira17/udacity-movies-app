@@ -22,6 +22,14 @@ public class MovieReview implements Parcelable {
         mContent = content;
     }
 
+    public String getAuthor() {
+        return mAuthor;
+    }
+
+    public String getContent() {
+        return mContent;
+    }
+
     @Override
     public int describeContents() {
         return 0;

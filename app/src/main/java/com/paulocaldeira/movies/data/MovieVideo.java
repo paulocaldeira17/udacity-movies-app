@@ -20,6 +20,18 @@ public class MovieVideo implements Parcelable {
         mKey = key;
     }
 
+    public String getName() {
+        return mName;
+    }
+
+    public String getType() {
+        return mType;
+    }
+
+    public String getKey() {
+        return mKey;
+    }
+
     @Override
     public int describeContents() {
         return 0;
