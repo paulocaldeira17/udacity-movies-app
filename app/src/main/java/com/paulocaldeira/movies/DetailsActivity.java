@@ -191,6 +191,11 @@ public class DetailsActivity extends AppCompatActivity implements
                         getString(R.string.added_to_favorites) :
                         getString(R.string.removed_from_favorites), Toast.LENGTH_SHORT).show();
                 return true;
+
+            case android.R.id.home:
+                // Makes smooth transition with poster
+                supportFinishAfterTransition();
+                return true;
         }
 
         return super.onOptionsItemSelected(item);

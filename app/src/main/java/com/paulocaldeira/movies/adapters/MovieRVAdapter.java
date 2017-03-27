@@ -70,9 +70,10 @@ public class MovieRVAdapter extends InfiniteRVAdapter<Movie, MovieRVAdapter.Movi
     public interface OnMovieItemClickListener {
         /**
          * On Movie Click
+         * @param view Item view
          * @param movie Movie
          */
-        void onMovieImageClicked(Movie movie);
+        void onMovieImageClicked(View view, Movie movie);
     }
 
     /**
@@ -94,7 +95,7 @@ public class MovieRVAdapter extends InfiniteRVAdapter<Movie, MovieRVAdapter.Movi
         @Override
         public void onClick(View view) {
             if (mItemClickListener != null) {
-                mItemClickListener.onMovieImageClicked(mItems.get(getAdapterPosition()));
+                mItemClickListener.onMovieImageClicked(view, mItems.get(getAdapterPosition()));
             }
         }
     }

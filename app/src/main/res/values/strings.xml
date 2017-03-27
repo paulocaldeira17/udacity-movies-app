@@ -1,11 +1,11 @@
 <resources>
     <!-- Movies Database Configs -->
-    <string name="movies_database_api_host">https://api.themoviedb.org/</string>
-    <string name="movies_database_api_key">[your themoviedb.org api key goes here]</string>
-    <string name="movies_database_img_path">https://image.tmdb.org/t/p/w185/</string>
+    <string name="movies_database_api_host" translatable="false">https://api.themoviedb.org/</string>
+    <string name="movies_database_api_key" translatable="false">[your themoviedb.org api key goes here]</string>
+    <string name="movies_database_img_path" translatable="false">https://image.tmdb.org/t/p/w185/</string>
 
     <!-- Content Provider Configs -->
-    <string name="content_authority">com.paulocaldeira.movies</string>
+    <string name="content_authority" translatable="false">com.paulocaldeira.movies</string>
 
     <!-- Strings -->
     <string name="app_name">Movies</string>
@@ -25,5 +25,6 @@
     <string name="add_to_favorites">Add to favorites</string>
     <string name="trailers">Trailers</string>
     <string name="reviews">Reviews</string>
-    <string name="youtube_url">https://www.youtube.com/watch?v=</string>
+    <string name="youtube_url" translatable="false">https://www.youtube.com/watch?v=</string>
+    <string name="transition_poster" translatable="false">poster</string>
 </resources>

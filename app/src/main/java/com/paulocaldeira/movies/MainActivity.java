@@ -3,8 +3,10 @@ package com.paulocaldeira.movies;
 import android.accounts.NetworkErrorException;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -334,13 +336,20 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onMovieImageClicked(Movie movie) {
+    public void onMovieImageClicked(View view, Movie movie) {
         Intent intent = new Intent(this, DetailsActivity.class);
 
         // Pass movie (parceable) through extra
         intent.putExtra(DetailsActivity.EXTRA_MOVIE, movie);
 
-        startActivity(intent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            // Post image view animation
+            ActivityOptionsCompat options = ActivityOptionsCompat.
+                    makeSceneTransitionAnimation(this, view.findViewById(R.id.iv_poster), getString(R.string.transition_poster));
+            startActivity(intent, options.toBundle());
+        } else {
+            startActivity(intent);
+        }
     }
 
     @Override
