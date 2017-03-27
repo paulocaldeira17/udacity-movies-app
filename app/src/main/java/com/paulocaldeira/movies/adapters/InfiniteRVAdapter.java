@@ -46,6 +46,10 @@ public abstract class InfiniteRVAdapter<T, VH extends RecyclerView.ViewHolder> e
         }
     }
 
+    public List<T> getItems() {
+        return mItems;
+    }
+
     /**
      * Adds an item
      * @param item Item

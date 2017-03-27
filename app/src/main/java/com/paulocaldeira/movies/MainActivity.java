@@ -4,6 +4,7 @@ import android.accounts.NetworkErrorException;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -17,12 +18,14 @@ import android.widget.LinearLayout;
 import com.paulocaldeira.movies.adapters.MovieRVAdapter;
 import com.paulocaldeira.movies.components.InfiniteRecyclerView;
 import com.paulocaldeira.movies.data.Movie;
+import com.paulocaldeira.movies.helpers.GridLayoutHelper;
 import com.paulocaldeira.movies.helpers.PreferencesHelper;
 import com.paulocaldeira.movies.providers.FavoriteMovieDataProvider;
 import com.paulocaldeira.movies.providers.MovieDataProvider;
 import com.paulocaldeira.movies.providers.MovieRemoteDataProvider;
 import com.paulocaldeira.movies.providers.RequestHandler;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -36,8 +39,13 @@ public class MainActivity extends AppCompatActivity implements
 
     // Constants
     private static final String TAG = "#" + MainActivity.class.getSimpleName();
-    private static final int DEFAULT_SPAN = 2;
     private static final int FIRST_PAGE = 1;
+
+    // State
+    private static final String STATE_RV_POSITION = "state_rv_scroll_position";
+    private static final String STATE_MOVIES_LIST = "state_movies_list";
+    private static final String STATE_CURRENT_PAGE_NUMBER = "state_current_page_number";
+    private static final String STATE_CURRENT_MODE = "state_mode";
 
     // List mode
     private static final String MODE_POPULAR = "popular";
@@ -54,14 +62,17 @@ public class MainActivity extends AppCompatActivity implements
 
     private MovieRVAdapter mAdapter;
     private ActionBar mActionBar;
+    private GridLayoutManager mLayoutManager;
+    private Parcelable mLayoutManagerSavedState;
 
     // Providers
     private MovieDataProvider mProvider;
     private MovieRemoteDataProvider mRemoteDataProvider;
     private FavoriteMovieDataProvider mFavoriteDataProvider;
 
-    // List mode
+    // Attributes
     private String mCurrentMode;
+    private int mPageNumber = FIRST_PAGE;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,8 +84,8 @@ public class MainActivity extends AppCompatActivity implements
 
         mActionBar = getSupportActionBar();
 
-        GridLayoutManager gridLayout = new GridLayoutManager(this, DEFAULT_SPAN);
-        mRecyclerView.setLayoutManager(gridLayout);
+        mLayoutManager = new GridLayoutManager(this, GridLayoutHelper.calculateNoOfColumns(this));
+        mRecyclerView.setLayoutManager(mLayoutManager);
 
         // Movies Remote Provider
         MovieRemoteDataProvider.Builder dataProviderBuilder = new MovieRemoteDataProvider.Builder(this);
@@ -101,22 +112,67 @@ public class MainActivity extends AppCompatActivity implements
         // Infinite on scroll listener
         mRecyclerView.addLoadMoreListener(this);
 
-        // Set first mode
+        // Initializes user shared preferences listener
         PreferencesHelper.registerUserSharedPreferencesListener(this, this);
-        setCurrentMode(PreferencesHelper.getMoviesListMode(this, DEFAULT_MODE));
+
+        // Set current mode
+        setCurrentMode(PreferencesHelper.getMoviesListMode(this, DEFAULT_MODE), null == savedInstanceState);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        // Stores recycler view current position
+        outState.putParcelable(STATE_RV_POSITION, mLayoutManager.onSaveInstanceState());
+
+        // Stores movies list
+        outState.putParcelableArrayList(STATE_MOVIES_LIST, (ArrayList) mAdapter.getItems());
+
+        // Stores current page
+        outState.putInt(STATE_CURRENT_PAGE_NUMBER, mPageNumber);
+
+        // Stores current mode
+        outState.putString(STATE_CURRENT_MODE, mCurrentMode);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        // Check for recycler view current position
+        if (null != savedInstanceState) {
+            // Recycler view last position
+            if (savedInstanceState.containsKey(STATE_RV_POSITION)) {
+                mLayoutManagerSavedState = savedInstanceState.getParcelable(STATE_RV_POSITION);
+            }
+
+            // Movies list
+            if (savedInstanceState.containsKey(STATE_MOVIES_LIST)) {
+                mAdapter.addItems((List) savedInstanceState.getParcelableArrayList(STATE_MOVIES_LIST));
+            }
+
+            // Current page number
+            if (savedInstanceState.containsKey(STATE_CURRENT_PAGE_NUMBER)) {
+                mPageNumber = savedInstanceState.getInt(STATE_CURRENT_PAGE_NUMBER);
+            }
+
+            // Current mode
+            if (savedInstanceState.containsKey(STATE_CURRENT_MODE)) {
+                mCurrentMode = savedInstanceState.getString(STATE_CURRENT_MODE);
+            }
+        }
     }
 
     /**
      * Sets current mode
      * @param mode Mode
+     * @param forceLoad Forces load
      */
-    private void setCurrentMode(String mode) {
+    private void setCurrentMode(String mode, boolean forceLoad) {
         if (mCurrentMode != mode) {
             // Set current mode
             mCurrentMode = mode;
-
-            // Resets recycler view infinite scroll current state
-            mRecyclerView.resetState();
 
             switch (mCurrentMode) {
                 case MODE_POPULAR:
@@ -133,8 +189,18 @@ public class MainActivity extends AppCompatActivity implements
                     break;
             }
 
-            reloadMovies();
+            if (forceLoad) {
+                reloadMovies();
+            }
         }
+    }
+
+    /**
+     * Sets current mode
+     * @param mode Mode
+     */
+    private void setCurrentMode(String mode) {
+        setCurrentMode(mode, false);
     }
 
     @Override
@@ -172,8 +238,10 @@ public class MainActivity extends AppCompatActivity implements
     private void reloadMovies() {
         // Clears adapter current items
         mAdapter.clear();
-
-        loadMovies(FIRST_PAGE);
+        // Restart page number
+        mPageNumber = FIRST_PAGE;
+        // Loads first page
+        loadMovies(mPageNumber);
     }
 
     /**
@@ -225,7 +293,7 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onLoadMore(int page, int totalItemsCount) {
-        loadMovies(page);
+        loadMovies(++mPageNumber);
     }
 
     /**
@@ -278,7 +346,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
         if (s.equals(PreferencesHelper.PREF_MOVIES_LIST_MODE)) {
-            setCurrentMode(sharedPreferences.getString(s, DEFAULT_MODE));
+            setCurrentMode(sharedPreferences.getString(s, DEFAULT_MODE), true);
         }
     }
 
@@ -288,6 +356,7 @@ public class MainActivity extends AppCompatActivity implements
     private class MoviesRequestHandler implements RequestHandler<List<Movie>> {
         @Override
         public void beforeRequest() {
+            mLayoutManagerSavedState = null;
             mSwipeRefreshLayout.setRefreshing(true);
         }
 
@@ -300,6 +369,10 @@ public class MainActivity extends AppCompatActivity implements
 
             showItems();
             mAdapter.addItems(movies);
+
+            if (mLayoutManagerSavedState != null) {
+                mLayoutManager.onRestoreInstanceState(mLayoutManagerSavedState);
+            }
         }
 
         @Override
