@@ -24,8 +24,8 @@
             android:fitsSystemWindows="true"
             app:contentScrim="?attr/colorPrimary"
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
-            app:expandedTitleMarginStart="48dp"
-            app:expandedTitleMarginEnd="64dp">
+            app:expandedTitleMarginStart="@dimen/ctl_expanded_title_margin_start"
+            app:expandedTitleMarginEnd="@dimen/ctl_expanded_title_margin_end">
 
             <ImageView
                 android:id="@+id/iv_backdrop"

@@ -7,4 +7,11 @@
     <dimen name="text_margin">16dp</dimen>
     <dimen name="activity_padding">16dp</dimen>
     <dimen name="header_padding">16dp</dimen>
+    <dimen name="item_movie_poster_height">300dp</dimen>
+    <dimen name="details_poster_width">130dp</dimen>
+    <dimen name="details_poster_height">180dp</dimen>
+    <dimen name="ctl_expanded_title_margin_start">48dp</dimen>
+    <dimen name="ctl_expanded_title_margin_end">64dp</dimen>
+    <dimen name="screen_alert_icon_width">120dp</dimen>
+    <dimen name="screen_alert_icon_height">120dp</dimen>
 </resources>
